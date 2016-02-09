@@ -43,12 +43,16 @@ def make_google_api_request(request_url):
     return result
        
        
-def geocode_intersection(intersection_string):
+def geocode_intersection(intersection_string, locale):
     """
-    Get a tuple containing the latitude and longitude of the given address.
+    Get a tuple containing the latitude and longitude of the given address,
+    if the given address exists within locale
     """
+    formatted_locale = "locality:" + locale
     data = urllib.parse.urlencode({"address" : intersection_string,
-                                  "key" : API_KEY})
+                                   "key" : API_KEY,
+                                   "components" : formatted_locale})
+                                   
     result = make_google_api_request(API_URL + data)
     if result["status"] == "OK":
         if "intersection" in result["results"][0]["types"]:
@@ -72,7 +76,7 @@ def geocode_president(pres_number, pres_name, userLoc):
     street_string = get_ordinal_string(pres_number) + " and " + pres_name
     full_address = street_string + ", " + userLoc
     #full_address should now look like "nth and President, City, State, USA"
-    return (street_string, geocode_intersection(full_address))
+    return (street_string, geocode_intersection(full_address, userLoc))
 
     
 def reverse_geocode(userCoords):
@@ -98,6 +102,7 @@ def main():
     print(reverse_geocode((44.051944, -123.086667)))
     print(geocode_intersection("1585 E. 13th Ave, Eugene, OR, 97403"))
     print(geocode_president(1, "Washington", "Eugene, Oregon, USA"))
+    print(geocode_president(9, "Harrison", "Phoenix, AZ, USA"))
     
 if __name__ == "__main__":
     main()
