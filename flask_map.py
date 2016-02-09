@@ -33,9 +33,8 @@ app = flask.Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE":"filesystem",
                            "CACHE_THRESHOLD":CACHESIZE,
                            "CACHE_DIR":".flaskCache",
-                           "CACHE_DEFAULT_TIMEOUT":5000}) #timeout is 2 seconds
+                           "CACHE_DEFAULT_TIMEOUT":10}) #timeout is in seconds
 
-#cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 app.secret_key = CONFIG.COOKIE_KEY  # Should allow using session variables
 
 @cache.memoize() # Cached so we can avoid the 4+ second API lookup time
