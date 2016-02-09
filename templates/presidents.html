@@ -63,6 +63,7 @@
             $.getJSON( "/_getPoints", { city: city_location },
               function(data) {
                 if (data.result.did_find_points) {
+                    var pins = [];
                     for (point_num in data.result.points) {
                         point = data.result.points[point_num];
                         var marker = L.marker(point[1], title = point[0]).addTo(map);
@@ -75,7 +76,11 @@
                         marker.on('mouseout', function(e) {
                             this.closePopup();
                         });
+                        pins.push(marker);
                     }
+                    var group = new L.featureGroup(pins);
+                    // Zoom map to fit all pins, with some padding:
+                    map.fitBounds(group.getBounds().pad(0.2));
                 }
                 
               }
