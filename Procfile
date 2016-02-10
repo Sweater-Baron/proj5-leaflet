@@ -1,1 +1,1 @@
-web: gunicorn flask_scrabble:app --log-file -
+web: gunicorn flask_map:app --log-file -
