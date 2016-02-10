@@ -45,39 +45,33 @@ def make_google_api_request(request_url):
        
 def geocode_intersection(intersection_string, locale):
     """
-    Get a tuple containing the latitude and longitude of the given address,
-    if the given address exists within locale
+    Get a list of points matching a given intersection, where a point is a tuple
+    like (lat, lng)
+    
+    Args:
+        intersection_string: description of intersection like ("1st and Washington")
+        locale: string like "city, state, country"
+        
+    
     """
     formatted_locale = "locality:" + locale
-    data = urllib.parse.urlencode({"address" : intersection_string,
+    data = urllib.parse.urlencode({"address" : intersection_string+", "+locale,
                                    "key" : API_KEY,
                                    "components" : formatted_locale})
-                                   
-    result = make_google_api_request(API_URL + data)
-    if result["status"] == "OK":
-        if "intersection" in result["results"][0]["types"]:
-            lat = result["results"][0]["geometry"]["location"]["lat"]
-            lng = result["results"][0]["geometry"]["location"]["lng"]
-            return (lat, lng)
-        else:
-            return "Intersection does not exist"
+    
+    points = []
+    response = make_google_api_request(API_URL + data)
+    if response["status"] == "OK":
+        for result in response["results"]:
+            if "intersection" in result["types"]:
+                # We want to ignore non-intersection results
+                lat = result["geometry"]["location"]["lat"]
+                lng = result["geometry"]["location"]["lng"]
+                points.append((lat, lng))
     else:
-        return "Status: " + result["status"]
-    
-    
-def geocode_president(pres_number, pres_name, userLoc):
-    """
-    Look for the intersection of pres_name and pres_number in the town of
-    userLoc
-    userLoc is typically formatted like "City, State, Country", but Google will
-    accept other formats
-    
-    """
-    street_string = get_ordinal_string(pres_number) + " and " + pres_name
-    full_address = street_string + ", " + userLoc
-    #full_address should now look like "nth and President, City, State, USA"
-    return (street_string, geocode_intersection(full_address, userLoc))
-
+        print("Google's API didn't like that. Response:\n" + response)
+        
+    return points
     
 def reverse_geocode(userCoords):
     """
@@ -99,10 +93,10 @@ def reverse_geocode(userCoords):
     
     
 def main():
-    print(reverse_geocode((44.051944, -123.086667)))
-    print(geocode_intersection("1585 E. 13th Ave, Eugene, OR, 97403"))
-    print(geocode_president(1, "Washington", "Eugene, Oregon, USA"))
-    print(geocode_president(9, "Harrison", "Phoenix, AZ, USA"))
+    #print(reverse_geocode((44.051944, -123.086667)))
+    #print(geocode_intersection("1585 E. 13th Ave, Eugene, OR, 97403"))
+    print(geocode_intersection("2nd and Washington", "Phoenix, Arizona, USA"))
+    #print(geocode_president("9th and Harrison", "Phoenix, AZ, USA"))
     
 if __name__ == "__main__":
     main()

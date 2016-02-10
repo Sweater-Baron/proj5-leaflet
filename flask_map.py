@@ -33,19 +33,34 @@ app = flask.Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE":"filesystem",
                            "CACHE_THRESHOLD":CACHESIZE,
                            "CACHE_DIR":".flaskCache",
-                           "CACHE_DEFAULT_TIMEOUT":10}) #timeout is in seconds
+                           "CACHE_DEFAULT_TIMEOUT":1000})
 
 app.secret_key = CONFIG.COOKIE_KEY  # Should allow using session variables
 
 @cache.memoize() # Cached so we can avoid the 4+ second API lookup time
-def get_president_points(user_city):
+def geocode_presidents(town):
+    """
+    Returns a list of all intersections where a numbered street crosses a street
+    named after the corresponding president ("1st and Washington", etc.)
+    
+    Each item in the resulting list is a tuple, with item[0] holding the name
+    of the intersection ("1st and Washington"), and item[1] holding a tuple
+    containing the latitude and longitude of the intersection.
+    
+    Args:
+    town is typically formatted like "City, State, Country", but Google will
+    accept other formats
+    
+    """
     points = []
-    for pres_num in PRESIDENTS:
-        point = geocoder.geocode_president(pres_num, PRESIDENTS[pres_num], user_city)
-        if isinstance(point[1], tuple):
-            # If the 2nd value in point is a tuple, we found a valid spot.
-            points.append(point)
-            # Note that these tuples will become arrays when jsonified
+    
+    for i in PRESIDENTS:
+        streets = geocoder.get_ordinal_string(i) + " and " + PRESIDENTS[i]
+        
+        intersections = geocoder.geocode_intersection(streets, town)
+        for point in intersections:
+            points.append((streets, point))
+            
     return points
 
 ###
@@ -67,15 +82,20 @@ def index():
 @app.route("/_getPoints")
 def getPoints():
     """
-    User's location has been found. We need to return a list of
-    points. TODO: more details
+    The user gave us their city. We must return a list of points marking
+    places where a numbered street intersects a street named after the president
+    corresponding to that number (e.g. 1st and Washington)
+    
+    The points are formatted as tuples, where point[0] is a description of the
+    intersection ("1st and Washington"), and point[1] is a tuple containing the
+    latitude and longitude of the point.
     """
     app.logger.debug("Entering getPoints")
     rslt = {}
     points = []
     
     user_city = request.args.get("city", type=str)
-    points = get_president_points(user_city)
+    points = geocode_presidents(user_city)
     
     rslt["points"] = points
     rslt["did_find_points"] = bool(points) # Empty lists are False
