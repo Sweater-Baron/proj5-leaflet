@@ -16,5 +16,5 @@ COOKIE_KEY = '' # Replace with a new key
 API_KEY = '' # Replace with a google API key that has the geocoding API enabled
              # in the Google Developer Console
              
-CACHESIZE = 500000000 # The documentation wasn't clear what units this is in,
+CACHESIZE = 500000000 # The documentation wasn't clear what unit this is in,
 # but it's probably bytes
