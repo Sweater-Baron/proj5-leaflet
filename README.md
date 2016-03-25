@@ -9,8 +9,6 @@ This app displays a Leaflet map centered on the user's location. It then uses Go
 The server uses Google's non-JavaScript geocoding API to find the locations of all the intersections. Google limits geocoding requests to 10 per second, so doing all 44 geocoding requests via the API takes a while. To get around this, all locations are cached, so that if the site has ever been used in a particular city before, the server doesn't have to use the slow geocoding API.
 
 ## Limitations
-If a city has, say, two 1st Streets, and both of them intersect Washington, the Google API will sometimes still only return the location of one intersection. (I can't really fault Google for that, because I originally made the same mistake in my own code.) In Phoenix, for example, the Google API correctly finds two "1st and Washington" intersections, but it only finds one of the two "2nd and Adams" intersections. (Phoenix is, incidentally, a great place to do testing if you're working on a map or navigation program, because their street naming schema is absolutely bonkers. "South 1st Avenue" and "South 1st Avenue" can sometimes refer to two completely streets, while "North 1st Avenue" and "South 1st Avenue" can sometimes refer to two parts of the same street.)
-
 Due to the request rate limitations of the Google API, concurrent users could break the system if neither of their cities are already in the cache (also I'm not 100% sure the cache is thread safe). This could be solved by running all API requests in a single, separate thread, but that would be even more outside the scope of the assignment than I have already gone.
 
 ## Setup
