@@ -14,5 +14,7 @@ Due to the request rate limitations of the Google API, concurrent users could br
 ## Setup
 Run "make install". Create a CONFIG.py from the CONFIG.base.py. Run flask_map.py.
 
-## IX URL
-ix.cs.uoregon.edu/~god/public_html/CIS399/htbin/proj5-leaflet
+## Working example
+http://pres-streets.herokuapp.com/
+
+Note that the above example can be very slow because it's running on the free tier.
